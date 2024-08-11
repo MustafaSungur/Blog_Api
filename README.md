@@ -35,10 +35,10 @@ The project is organized into several folders and files to maintain a clean and 
       ├── BlogAPI/ 
 
 #### Key Folders and Files
-**Controllers/:** Contains the API controllers that handle HTTP requests.
-**DTOs/:** Contains Data Transfer Objects used for data encapsulation.
-**Data/: **Contains the database context and migration files.
-**models/:** Contains the entity models representing the database schema.
+* **Controllers/:** Contains the API controllers that handle HTTP requests.
+* **DTOs/:** Contains Data Transfer Objects used for data encapsulation.
+* **Data/: ** Contains the database context and migration files.
+* **models/:** Contains the entity models representing the database schema.
 
 ### Model Classes
 The model classes represent the entities in the database. Here are some key model classes used in the project:
