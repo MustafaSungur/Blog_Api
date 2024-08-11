@@ -37,7 +37,7 @@ The project is organized into several folders and files to maintain a clean and 
 #### Key Folders and Files
 * **Controllers/:** Contains the API controllers that handle HTTP requests.
 * **DTOs/:** Contains Data Transfer Objects used for data encapsulation.
-* **Data/: ** Contains the database context and migration files.
+* **Data/:** Contains the database context and migration files.
 * **models/:** Contains the entity models representing the database schema.
 
 ### Model Classes
