@@ -103,6 +103,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 |  DELETE | /api/User	  | Deactivates a user by setting their status to false. Accessible to the user themselves or an admin.|
 |  POST |  /api/User/ForgetPassword	 | Generates a password reset token for the specified username, except for the "Admin" user.  |
 |  POST |  /api/User/ForgetPassword	 |  Resets the password using a token, except for the "Admin" user. |
+|  PUT | /api/User/{id}	 | Updates a user. Accessible by admin users or users who are updating their own profile. |
 
 ## Running
 To run the project, follow these steps:
