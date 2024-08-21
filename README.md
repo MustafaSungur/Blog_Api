@@ -170,8 +170,8 @@ URL Parameter: postId = 1
 Endpoint: POST /api/CommentLikes/{commentId}
 URL Parameter: commentId = 1
 
-### Conclusion
+## Conclusion
 The BlogAPI project provides a robust and scalable solution for managing blog resources. With its comprehensive set of features, modern technology stack, and detailed documentation, it is well-suited for real-world blog environments.
 
-### Acknowledgements
+## Acknowledgements
 This project was developed as part of the backend program at [Softito Yazılım - Bilişim Akademisi](https://softito.com.tr/ "Softito Yazılım - Bilişim Akademisi"). Special thanks to the instructors and peers who provided valuable feedback and support throughout the development process.
