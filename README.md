@@ -137,6 +137,7 @@ To test the BlogAPI project, follow these steps:
 #### **Step 2: Login as Author:**
 - Endpoint: POST /Login
 - JSON Body:
+  
 		{
 			"userName": "johndoe123",
 			"password": "Test123!"
@@ -146,6 +147,7 @@ To test the BlogAPI project, follow these steps:
 **1.  Create Post**
 - Endpoint: POST /api/Posts
 - JSON Body:
+  
 		{
 		  "title": "My First Post",
 		  "content": "This is the content of my first post."
@@ -154,6 +156,7 @@ To test the BlogAPI project, follow these steps:
 **2. Comment on a Post:**
 - Endpoint: POST /api/Comments
 - JSON Body:
+
 			{
 				"content": "Great post!",
 				"postId": 1
