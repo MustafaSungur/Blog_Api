@@ -55,7 +55,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 | GET  | /Logout	  | Logs out the authenticated user.  |
 
 
-#### CommentLikes  Endpoints
+### CommentLikes  Endpoints
 | HTTP Method	  | Endpoint	  |  Endpoint	 |
 | ------------ | ------------ | ------------ |
 | POST  | /api/CommentLikes	  |  Allows an authenticated user to like a comment. |
@@ -64,7 +64,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 | GET  | /api/CommentLikes/user/{userId}	  | Retrieves all comment likes by a specific user. Accessible only to the user or an admin. |
 
 
-#### Comments Endpoints
+### Comments Endpoints
 
 | HTTP Method	  | Endpoint	  |  Endpoint	 |
 | ------------ | ------------ | ------------ |
@@ -75,7 +75,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 | GET  |  /api/Comments/user/{userId}	 |  Retrieves all comments made by a specific user. Accessible only to the user or an admin. |
 
 
-#### PostLikes Endpoints
+### PostLikes Endpoints
 | HTTP Method	  | Endpoint	  |  Endpoint	 |
 | ------------ | ------------ | ------------ |
 |  GET | /api/PostLikes	  | Retrieves all post likes, including the associated post and user information.  |
@@ -84,7 +84,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 | DELETE  |  /api/PostLikes	 | Allows an authenticated user to remove their like from a specific post.  |
 |GET | /api/PostLikes/user/{userId}	  |  Retrieves all post likes by a specific user. |
 
-#### Posts Endpoints
+### Posts Endpoints
 | HTTP Method	  | Endpoint	  |  Endpoint	 |
 | ------------ | ------------ | ------------ |
 | GET  |  /api/Posts	 |  Retrieves all posts, including their comments, replies, and likes. |
@@ -94,7 +94,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 |  DELETE | /api/Posts/{id}	  |  Deletes a specific post, including its comments and likes. Only the post owner or an admin can perform this action. |
 |  GET | /api/Posts/User/{id}	  | Retrieves all posts by a specific user, including their comments, replies, and likes.  |
 
-#### User Endpoints
+### User Endpoints
 | HTTP Method	  | Endpoint	  |  Endpoint	 |
 | ------------ | ------------ | ------------ |
 | GET  | /api/User	  |  Retrieves all users. This action is restricted to admin users. |
