@@ -104,7 +104,7 @@ The BlogAPI provides various endpoints for managing blog resources. Here is a ta
 |  POST |  /api/User/ForgetPassword	 | Generates a password reset token for the specified username, except for the "Admin" user.  |
 |  POST |  /api/User/ForgetPassword	 |  Resets the password using a token, except for the "Admin" user. |
 
-### Running
+## Running
 To run the project, follow these steps:
 
 1. Clone the project:
@@ -117,7 +117,7 @@ To run the project, follow these steps:
 ### Developer Guide for Testing the Project
 To test the BlogAPI project, follow these steps:
 
-#### **Step 1: Register User**
+### **Step 1: Register User**
 
 - Endpoint: POST /api/User
 - JSON Body:
@@ -134,7 +134,7 @@ To test the BlogAPI project, follow these steps:
 	  "confirmPassword": "Test123!"
 	}
 ```
-#### **Step 2: Login as Author:**
+### **Step 2: Login as Author:**
 - Endpoint: POST /Login
 - JSON Body:
   
@@ -143,8 +143,8 @@ To test the BlogAPI project, follow these steps:
 			"password": "Test123!"
 		}
 
-#### Step 3: Create and Interact with Posts
-**1.  Create Post**
+### Step 3: Create and Interact with Posts
+#### **1.  Create Post**
 - Endpoint: POST /api/Posts
 - JSON Body:
   
@@ -153,7 +153,7 @@ To test the BlogAPI project, follow these steps:
 		  "content": "This is the content of my first post."
 		}
 
-**2. Comment on a Post:**
+#### **2. Comment on a Post:**
 - Endpoint: POST /api/Comments
 - JSON Body:
 
@@ -162,11 +162,11 @@ To test the BlogAPI project, follow these steps:
 				"postId": 1
 			}
 
-**3. Like a Post:**
+#### **3. Like a Post:**
 Endpoint: POST /api/PostLikes/{postId}
 URL Parameter: postId = 1
 
-**4. Like a Comment:**
+#### **4. Like a Comment:**
 Endpoint: POST /api/CommentLikes/{commentId}
 URL Parameter: commentId = 1
 
