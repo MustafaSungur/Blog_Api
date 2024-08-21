@@ -2,11 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Blog.Models;
 using Blog.DTOs;
-using System;
-using System.Threading.Tasks;
-using Blog.DTOs.Blog.DTOs;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http.HttpResults;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
@@ -17,62 +12,83 @@ namespace Blog.Controllers
 	public class UserController : ControllerBase
 	{
 		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly IWebHostEnvironment _hostingEnvironment;
 
-		public UserController(UserManager<ApplicationUser> userManager)
+		public UserController(UserManager<ApplicationUser> userManager, IWebHostEnvironment hostingEnvironment)
 		{
+			_hostingEnvironment = hostingEnvironment;
 			_userManager = userManager;
 		}
 
-		// GET: api/User
-		[HttpGet]
-		[Authorize(Roles = "Admin")]
-		public async Task<ActionResult<IEnumerable<ApplicationUserReadDTO>>> GetAllUsers()
+
+        // GET: api/User
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public ActionResult<IEnumerable<ApplicationUserReadDTO>> GetAllUsers()
+        {
+            var users = _userManager.Users.ToList();
+
+            if (users == null || !users.Any())
+            {
+                return NotFound("No users found.");
+            }
+
+            var userDTOs = users.Select(user => new ApplicationUserReadDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                BirthDate = user.BirthDate,
+                Email = user.Email!,
+                UserName = user.UserName!,
+                PhotoUrl = user.PhotoUrl,
+                RegisterDate = user.RegisterDate,
+                Status = user.Status
+            }).ToList();
+
+            return userDTOs;
+        }
+
+        // POST: api/User
+        [HttpPost]
+		public async Task<ActionResult<ApplicationUserReadDTO>> PostUser([FromForm] ApplicationUserCreateDTO applicationUserDto)
 		{
-			var users = _userManager.Users.ToList();
-
-			if (users == null || !users.Any())
-			{
-				return NotFound("No users found.");
-			}
-
-			var userDTOs = users.Select(user => new ApplicationUserReadDTO
-			{
-				Id = user.Id,
-				FirstName = user.FirstName,
-				LastName = user.LastName,
-				BirthDate = user.BirthDate,
-				Email = user.Email!,
-				UserName = user.UserName!,
-				PhotoUrl = user.PhotoUrl,
-				RegisterDate = user.RegisterDate,
-				Status = user.Status
-			}).ToList();
-
-			return userDTOs;
-		}
-
-		// POST: api/User
-		[HttpPost]
-		public async Task<ActionResult<ApplicationUserReadDTO>> PostUser(ApplicationUserCreateDTO userDto)
-		{
-			if (userDto.Password != userDto.ConfirmPassword)
+			if (applicationUserDto.Password != applicationUserDto.ConfirmPassword)
 			{
 				return BadRequest("Passwords do not match.");
 			}
 
 			var user = new ApplicationUser
 			{
-				FirstName = userDto.FirstName,
-				LastName = userDto.LastName,
-				BirthDate = userDto.BirthDate,
-				Email = userDto.Email,
-				UserName = userDto.UserName,
-				PhotoUrl = userDto.PhotoUrl,
+				FirstName = applicationUserDto.FirstName,
+				LastName = applicationUserDto.LastName,
+				BirthDate = applicationUserDto.BirthDate,
+				Email = applicationUserDto.Email,
+				UserName = applicationUserDto.UserName,
 				RegisterDate = DateTime.Now,
 				Status = true
 			};
 
-			var result = await _userManager.CreateAsync(user, userDto.Password);
+			// Handle optional photo upload
+			if (applicationUserDto.Photo != null && applicationUserDto.Photo.Length > 0)
+			{
+				var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+				var uniqueFileName = Guid.NewGuid().ToString() + "_" + applicationUserDto.Photo.FileName;
+				var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+				using (var fileStream = new FileStream(filePath, FileMode.Create))
+				{
+					await applicationUserDto.Photo.CopyToAsync(fileStream);
+				}
+
+				user.PhotoUrl = "/Uploads/" + uniqueFileName;
+			}
+			else
+			{
+				user.PhotoUrl = null; // Or some default URL
+			}
+
+			var result = await _userManager.CreateAsync(user, applicationUserDto.Password);
 
 			if (!result.Succeeded)
 			{
@@ -94,6 +110,7 @@ namespace Blog.Controllers
 
 			return CreatedAtAction(nameof(GetUser), new { id = user.Id }, userReadDto);
 		}
+
 
 		// GET: api/User/5
 		[HttpGet("{id}")]
@@ -130,7 +147,71 @@ namespace Blog.Controllers
 		}
 
 
+		// PUT: api/User/{id}
+		[HttpPut("{id}")]
+		[Authorize]
+		public async Task<IActionResult> UpdateUser(string id, [FromForm] ApplicationUserUpdateDTO applicationUserDto)
+		{
 
+			var curretUserID  = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			var currentUser = await _userManager.FindByIdAsync(curretUserID!);
+			
+			bool isAdmin = await _userManager.IsInRoleAsync(currentUser!, "Admin");
+
+			if (!isAdmin && currentUser!.Id != id)
+			{
+				return StatusCode(403, "Access denied.");
+			}
+
+
+
+			var user = await _userManager.FindByIdAsync(id);
+		
+			if (user == null)
+			{
+				return NotFound("User not found.");
+			}
+
+			// Update user properties
+			user.FirstName = applicationUserDto.FirstName;
+			user.LastName = applicationUserDto.LastName;
+			user.Email = applicationUserDto.Email;
+
+			// Handle photo update
+			if (applicationUserDto.Photo != null && applicationUserDto.Photo.Length > 0)
+			{
+
+				// Check if user already has a photo and delete it
+				if (!string.IsNullOrEmpty(user.PhotoUrl))
+				{
+					var existingPhotoPath = Path.Combine(_hostingEnvironment.WebRootPath, user.PhotoUrl.TrimStart('/'));
+					if (System.IO.File.Exists(existingPhotoPath))
+					{
+						System.IO.File.Delete(existingPhotoPath);
+					}
+				}
+
+				var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+				var uniqueFileName = Guid.NewGuid().ToString() + "_" + applicationUserDto.Photo.FileName;
+				var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+				using (var fileStream = new FileStream(filePath, FileMode.Create))
+				{
+					await applicationUserDto.Photo.CopyToAsync(fileStream);
+				}
+
+				user.PhotoUrl = "/Uploads/" + uniqueFileName;  // Update the Photo URL
+			}
+
+			// Save changes
+			var result = await _userManager.UpdateAsync(user);
+			if (!result.Succeeded)
+			{
+				return BadRequest(result.Errors);
+			}
+
+			return NoContent(); // 204 No Content is typically returned for successful PUT requests.
+		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteUser(string id)

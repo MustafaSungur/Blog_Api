@@ -15,12 +15,15 @@ namespace Blog.Controllers
 	{
 		private readonly BlogContext _context;
 		private readonly UserManager<ApplicationUser> _userManager;
+		private readonly IWebHostEnvironment _hostingEnvironment;
 
-		public PostsController(BlogContext context, UserManager<ApplicationUser> userManager)
+		public PostsController(BlogContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment hostingEnvironment)
 		{
 			_context = context;
 			_userManager = userManager;
+			_hostingEnvironment = hostingEnvironment;
 		}
+
 
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<PostReadDTO>>> GetPosts()
@@ -133,12 +136,13 @@ namespace Blog.Controllers
 		}
 
 
-
-		// PUT: api/Posts/5
+// PUT: api/Posts/5
 		[HttpPut("{id}")]
 		[Authorize]
 		public async Task<IActionResult> PutPost(long id, PostCreateDTO postDto)
 		{
+
+
 
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -155,9 +159,37 @@ namespace Blog.Controllers
 
 			post.Title = postDto.Title;
 			post.Content = postDto.Content;
-			post.PhotoUrl = postDto.PhotoUrl;
 			post.RegisterDate = DateTime.Now;
 			post.UserId = userId!;
+
+
+			// Handle optional photo upload
+			if (postDto.Photo != null && postDto.Photo.Length > 0)
+			{
+				// Check if user already has a photo and delete it
+				if (!string.IsNullOrEmpty(post.PhotoUrl))
+				{
+					var existingPhotoPath = Path.Combine(_hostingEnvironment.WebRootPath, post.PhotoUrl.TrimStart('/'));
+					if (System.IO.File.Exists(existingPhotoPath))
+					{
+						System.IO.File.Delete(existingPhotoPath);
+					}
+				}
+				var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+				var uniqueFileName = Guid.NewGuid().ToString() + "_" + postDto.Photo.FileName;
+				var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+				using (var fileStream = new FileStream(filePath, FileMode.Create))
+				{
+					await postDto.Photo.CopyToAsync(fileStream);
+				}
+
+				post.PhotoUrl = "/Uploads/" + uniqueFileName;
+			}
+			else
+			{
+				post.PhotoUrl = null; // Or some default URL
+			}
 
 			_context.Entry(post).State = EntityState.Modified;
 
@@ -181,6 +213,7 @@ namespace Blog.Controllers
 		}
 
 
+
 		// POST: api/Posts
 		[HttpPost]
 		[Authorize]
@@ -192,10 +225,28 @@ namespace Blog.Controllers
 			{
 				Title = postDto.Title,
 				Content = postDto.Content,
-				PhotoUrl = postDto.PhotoUrl,
 				RegisterDate = DateTime.Now,
 				UserId = userId!,
 			};
+
+			// Handle optional photo upload
+			if (postDto.Photo != null && postDto.Photo.Length > 0)
+			{
+				var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+				var uniqueFileName = Guid.NewGuid().ToString() + "_" + postDto.Photo.FileName;
+				var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+				using (var fileStream = new FileStream(filePath, FileMode.Create))
+				{
+					await postDto.Photo.CopyToAsync(fileStream);
+				}
+
+				post.PhotoUrl = "/Uploads/" + uniqueFileName;
+			}
+			else
+			{
+				post.PhotoUrl = null; // Or some default URL
+			}
 
 			_context.Posts.Add(post);
 			await _context.SaveChangesAsync();
@@ -238,7 +289,6 @@ namespace Blog.Controllers
 
 			return CreatedAtAction("GetPost", new { id = postReadDto.Id }, postReadDto);
 		}
-
 
 		// DELETE: api/Posts/5
 		[HttpDelete("{id}")]
